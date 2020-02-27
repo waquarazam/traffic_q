@@ -61,7 +61,8 @@ class TrafficSimulatorEdge:
         self.port = DEFAULT_PORT + port
         self.sim_thread = port
         self.cur_episode = 0
-        self.cur_sec = 0
+        self.cur_step = 0
+        self.no_of_episode_step = 50
         self.data_path = "./large_grid/data/"
         self.output_path = "./out/"
         self.name = "LargeGridEnv"
@@ -122,7 +123,7 @@ class TrafficSimulatorEdge:
         vehs = self.sim.edge.getLastStepVehicleIDs(edge_name)
 
         for veh in vehs:
-            state.append(self.sim.vehicle.getRoute(veh)[-1])
+            state.append((self.sim.vehicle.getRoute(veh)[-1],veh))
         return state
 
 
@@ -165,50 +166,64 @@ class TrafficSimulatorEdge:
     def terminate(self):
         self.sim.close()
 
-    def step(self, action):
-        self._set_route(action)
+    def step(self, step_info): #step_info #tuple(edge,vehicle,state,action)
+        self._set_route(step_info)
         reward = []
 
         self._simulate(10)
-        self.cur_episode = self.cur_episode+1
 
-        for edge_name in self.edge_names:
+        observations = []
+        for step_info_instance in step_info:
+            edge_name = step_info_instance[0]
+
             #edge = edges[edge_name]
-            reward.append([self.sim.edge.getLastStepVehicleNumber(edge_name)*-1]*self.sim.edge.getLastStepVehicleNumber(edge_name))
+            reward = self.sim.edge.getLastStepVehicleNumber(edge_name)*-1
+            step_info_instance = list(step_info_instance)
+            print(reward)
+            step_info_instance.append(reward)
+            step_info_instance = tuple(step_info_instance)
+
+            observations.append(step_info_instance)
 
         done = False
 
-        if self.cur_step >= self.episode_length_sec:
+        if self.cur_step >= self.no_of_episode_step:
             done = True
-        return reward,done
+
+
+
+        return observations,done
 
 #actio is 2d list each row has actions for corresponding edges
-    def _set_route(self, action):
-        for index in range(len(self.edge_names)):
-            edge_name = self.edge_names[index]
-            vehs = self.sim.edge.getLastStepVehicleIDs(edge_name)
-            for veh_idx in range(len(vehs)):
-                veh = vehs[veh_idx]
-                a = action[index][veh_idx]
-                print(a)
-                old_route = self.sim.vehicle.getRoute(veh)
+    def _set_route(self, step_info):
+        for step_info_instance in step_info:
+            edge = step_info_instance[0]
+            veh = step_info_instance[1]
+            a = step_info_instance[3]
+            print(step_info_instance[0], a)
+            old_route = list(self.sim.vehicle.getRoute(veh))
+            current_edge_index = old_route.index(edge)
 
-                if(len(old_route)>2):
-                    li = list(old_route)
-                    li[1] = a
-                    new_route = self.sim.simulation.findRoute(a,li[-1])
-                    #print(new_route)
-                    new_route = list(new_route.edges)
-                    new_route.insert(0,old_route[0])
-                    print("old",old_route)
-                    print("new", new_route)
-                    #old_route = tuple(li)
-                    #old_route[1] = a
-                try:
-                    self.sim.vehicle.setRoute(veh,tuple(new_route))
-                except:
-                    print("route assignment failed")
-                    pass
+            if(len(old_route)-current_edge_index>2):
+
+                found_route = list(self.sim.simulation.findRoute(a,old_route[-1]).edges)
+                #print(old_route)
+                #print(found_route)
+                found_route = found_route[1:-1]
+                new_route = old_route[0:current_edge_index+1] + found_route
+                #print(new_route)
+                #print(new_route)
+                #new_route = list(new_route.edges)
+                #new_route.insert(0,old_route[0])
+                #print("old",old_route)
+                #print("new", new_route)
+                #old_route = tuple(li)
+                #old_route[1] = a
+            try:
+                self.sim.vehicle.setRoute(veh,tuple(new_route))
+            except:
+                print("route assignment failed")
+                pass
 
 
 
@@ -223,7 +238,7 @@ class TrafficSimulatorEdge:
             self.sim.simulationStep()
             # self._measure_state_step()
             # reward += self._measure_reward_step()
-            self.cur_sec += 1
+            self.cur_step = self.cur_step+1
             #if self.is_record:
                 # self._debug_traffic_step()
                 #self._measure_traffic_step()

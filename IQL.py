@@ -83,8 +83,6 @@ encode_edges(edge_names)
 #print(name_to_code)
 for edge_name in edge_names:
     edge = edges[edge_name]
-    if(edge_name == 'np14_nt22'):
-        print(" dsfdfsfsfghjuhfghudgyhuighui---------------",edge.neighbour)
     qnetwork_local = QNetwork(n_edges, len(edge.neighbour), seed).to(device)
     qnetwork_target = QNetwork(n_edges, len(edge.neighbour), seed).to(device)
     #print(len(edge.neighbour))
@@ -98,7 +96,9 @@ criterion = torch.nn.MSELoss()
         #self.qnetwork_target.eval()
 for index in range(100):
     actions = []
+
     states = []
+    step_info = [] #tuple(edge,vehicle,state,action)
     for edge_name in edge_names:
         if ':' in edge_name:
             continue
@@ -116,9 +116,11 @@ for index in range(100):
         edge_actions = []
         for state in edge_states:
             with torch.no_grad():
-                action_values = local(torch.from_numpy(name_to_code[state]).float())
+                action_values = local(torch.from_numpy(name_to_code[state[0]]).float())
             local.train()
-            print(action_values)
+            #print(action_values)
+
+
             #Epsilon -greedy action selction
             act=0
             if random.random() > eps:
@@ -130,12 +132,15 @@ for index in range(100):
 
 
             act = edge.neighbour[act]
-            print("act",act)
+            print(edge.name, act)
+            step_info.append((edge_name,state[1],state[0],act))
             edge_actions.append(act)
 
         actions.append(edge_actions)
-    rewards,done = simulator.step(actions)
-    for idx in range(len(edges)):
+    obs,done = simulator.step(step_info) # #tuple(edge,vehicle,state,action, reward, done)
+    print(obs)
+
+    for idx in range(len(obs)):
         edge = edges[idx]
         local = edge.qnetwork_local
         target = edge.qnetwork_target
