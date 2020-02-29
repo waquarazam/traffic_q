@@ -166,8 +166,8 @@ class TrafficSimulatorEdge:
     def terminate(self):
         self.sim.close()
 
-    def step(self, step_info): #step_info #tuple(edge,vehicle,state,action)
-        self._set_route(step_info)
+    def step(self, step_info): #step_info #tuple(edge,vehicle,state,action, action_values)
+        step_info = self._set_route(step_info)
         reward = []
 
         self._simulate(10)
@@ -179,7 +179,7 @@ class TrafficSimulatorEdge:
             #edge = edges[edge_name]
             reward = self.sim.edge.getLastStepVehicleNumber(edge_name)*-1
             step_info_instance = list(step_info_instance)
-            print(reward)
+            #print(reward)
             step_info_instance.append(reward)
             step_info_instance = tuple(step_info_instance)
 
@@ -196,11 +196,13 @@ class TrafficSimulatorEdge:
 
 #actio is 2d list each row has actions for corresponding edges
     def _set_route(self, step_info):
+        obs = []
+
         for step_info_instance in step_info:
             edge = step_info_instance[0]
             veh = step_info_instance[1]
             a = step_info_instance[3]
-            print(step_info_instance[0], a)
+            #print(step_info_instance[0], a)
             old_route = list(self.sim.vehicle.getRoute(veh))
             current_edge_index = old_route.index(edge)
 
@@ -219,13 +221,24 @@ class TrafficSimulatorEdge:
                 #print("new", new_route)
                 #old_route = tuple(li)
                 #old_route[1] = a
+                step_info_instance = list(step_info_instance)
+                step_info_instance.append(0)
+                step_info_instance = tuple(step_info_instance)
+                obs.append(step_info_instance)
+            else:
+                step_info_instance = list(step_info_instance)
+                step_info_instance.append(1)
+                step_info_instance = tuple(step_info)
+                obs.append(step_info_instance)
+
+
             try:
                 self.sim.vehicle.setRoute(veh,tuple(new_route))
             except:
                 print("route assignment failed")
                 pass
 
-
+            return obs
 
 
 
