@@ -57,12 +57,14 @@ class Node:
 class TrafficSimulatorEdge:
     def __init__(self, port=0):
         self.seed = 12
-        self.episode_length_sec = 10
+        self.no_of_epoch = 1
+        self.no_episode_per_epoch = 20
+        self.no_of_episode_step = 500
+
         self.port = DEFAULT_PORT + port
         self.sim_thread = port
         self.cur_episode = 0
         self.cur_step = 0
-        self.no_of_episode_step = 50
         self.data_path = "./large_grid/data/"
         self.output_path = "./out/"
         self.name = "LargeGridEnv"
@@ -158,7 +160,8 @@ class TrafficSimulatorEdge:
                     self.output_path + ('%s_%s_trip.xml' % (self.name, self.agent))]
         subprocess.Popen(command)
         # wait 2s to establish the traci server
-        time.sleep(2)
+        #time.sleep(1)
+        print("connecting on port: ", self.port)
         self.sim = traci.connect(port=self.port)
         self._simulate(10)
 
@@ -167,13 +170,17 @@ class TrafficSimulatorEdge:
         self.sim.close()
 
     def step(self, step_info): #step_info #tuple(edge,vehicle,state,action, action_values)
-        print("step_info before", step_info)
+        #print("step_info before", step_info)
+        x = len(step_info)
         step_info = self._set_route(step_info)
-        print("after after after after")
-        print("step_info after", step_info)
+        #print("after after after after")
+        #print("step_info after", step_info)
+        if(x!=len(step_info)):
+            print("error")
+            print(step_info)
         reward = []
-        print()
-        print()
+        #print()
+        #print()
         self._simulate(10)
 
         observations = []
@@ -195,7 +202,7 @@ class TrafficSimulatorEdge:
 
         done = False
 
-        if self.cur_step >= self.no_of_episode_step:
+        if self.sim.vehicle.getIDCount() == 0:
             done = True
 
 
@@ -207,20 +214,31 @@ class TrafficSimulatorEdge:
         obs = []
 
         for step_info_instance in step_info:
+
+
             edge = step_info_instance[0]
             veh = step_info_instance[1]
             a = step_info_instance[3]
             #print(step_info_instance[0], a)
             old_route = list(self.sim.vehicle.getRoute(veh))
+            #print(self.sim.vehicle.getRoute(veh))
             current_edge_index = old_route.index(edge)
+
 
             if(len(old_route)-current_edge_index>2):
 
                 found_route = list(self.sim.simulation.findRoute(a,old_route[-1]).edges)
                 #print(old_route)
                 #print(found_route)
-                found_route = found_route[1:-1]
-                new_route = old_route[0:current_edge_index+1] + found_route
+                #found_route = found_route[1:-1]
+                found_route.insert(0,edge)
+                new_route = found_route
+                #new_route = []
+                #for i in range(current_edge_index+1):
+                #    new_route.append(old_route[i])
+                #for i in range(1,len(found_route)):
+                #    new_route.append(found_route[i])
+                #new_route = old_route[0:current_edge_index+1] + found_route
                 #print(new_route)
                 #print(new_route)
                 #new_route = list(new_route.edges)
@@ -233,22 +251,40 @@ class TrafficSimulatorEdge:
                 step_info_instance.append(0)
                 step_info_instance = tuple(step_info_instance)
                 obs.append(step_info_instance)
+                #print("--------------old---------------")
+                #rint(old_route)
+                #print("----------------found-------------")
+                #print(found_route)
+                #print("-----------------new-------------------")
+                #print(new_route)
+                #print("current index ",current_edge_index, " edge ", edge, "action: ", a)
+                self.sim.vehicle.setRoute(veh,tuple(new_route))
+
             else:
-                new_route = tuple(old_route)
                 step_info_instance = list(step_info_instance)
                 step_info_instance.append(1)
                 step_info_instance = tuple(step_info_instance)
                 obs.append(step_info_instance)
 
 
-            try:
-                self.sim.vehicle.setRoute(veh,tuple(new_route))
-            except:
-                print("new route", new_route)
-                print("route assignment failed")
-                pass
+            #print(self.sim.vehicle.getRoute(veh))
 
-            return obs
+
+
+
+            #try:
+            #print(len(new_route))
+            #if(len(new_route)>20 and len(new_route)<100) :
+            #    print(veh)
+            #    print("old route", old_route)
+            #    print(new_route)
+            #    print(self.get_no_of_vehicles())
+            #except:
+                #print("new route", new_route)
+                #print("route assignment failed")
+
+
+        return obs
 
 
 
@@ -266,3 +302,28 @@ class TrafficSimulatorEdge:
                 # self._debug_traffic_step()
                 #self._measure_traffic_step()
         # return reward
+
+    def reset(self, gui=False):
+        # have to terminate previous sim before calling reset
+        #self._reset_state()
+        #if self.train_mode:
+        #    seed = self.seed
+        #else:
+            #seed = self.test_seeds[test_ind]
+        # self._init_sim(gui=True)
+        seed = self.seed
+        self.port = (self.port+2)%8500
+        self._init_sim(seed, gui=gui)
+        #self.cur_sec = 0
+        self.cur_episode += 1
+        # initialize fingerprint
+        #if self.agent == 'ma2c':
+            #self.update_fingerprint(self._init_policy())
+        #self._init_sim_traffic()
+        # next environment random condition should be different
+        self.seed += 1
+
+        #return self._get_state()
+
+    def get_no_of_vehicles(self):
+        return self.sim.vehicle.getIDCount()

@@ -6,7 +6,8 @@ import numpy as np
 import random
 from random import randint
 from torch.autograd import Variable
-
+import time
+import matplotlib.pyplot as plt
 
 class QNetwork(nn.Module):
     """ Actor (Policy) Model."""
@@ -52,7 +53,7 @@ def encode_edges(edge_names):
         code[idx] = np.double(1)
         name_to_code[name] = code
 
-def soft_update(self, local_model, target_model, tau):
+def soft_update(local_model, target_model, tau):
     """Soft update model parameters.
     θ_target = τ*θ_local + (1 - τ)*θ_target
     Params
@@ -99,109 +100,135 @@ for edge_name in edge_names:
 criterion = torch.nn.MSELoss()
         #self.qnetwork_local.train()
         #self.qnetwork_target.eval()
-for index in range(100):
-    actions = []
+done_episode = False
+done_epoch = False
+for epoch in range(simulator.no_of_epoch):
+    accumulated_reward_list=[]
+    for episode in range(simulator.no_episode_per_epoch):
 
-    states = []
-    step_info = [] #tuple(edge,vehicle,state,action, act_val)
-    for edge_name in edge_names:
-        #print("edge_name IQL", edge_name)
-        #print()
-        if ':' in edge_name:
-            continue
-        edge = edges[edge_name]
-        #print("edge",edge)
-        local = edge.qnetwork_local
-        target = edge.qnetwork_target
-        local = local.float()
-        target = target.float()
-        target.eval()
-        local.train()
+        for episode_step in range(simulator.no_of_episode_step):
+            actions = []
+            accumulated_reward=0
 
-        #print("edge name",edge_name)
-        edge_states = simulator.get_state(edge)
-        states.append(edge_states)
-        edge_actions = []
-        #print("edge_states", edge_states)
-        for state in edge_states:
-            #with torch.no_grad():
-                #print("---------------------------------------------",state)
-            var1 = Variable(torch.from_numpy(name_to_code[state[0]]),requires_grad=True)
-            action_values = local(var1.float())
+            states = []
+            step_info = [] #tuple(edge,vehicle,state,action, act_val)
+            for edge_name in edge_names:
+                #print("edge_name IQL", edge_name)
+                #print()
+                if ':' in edge_name:
+                    continue
+                edge = edges[edge_name]
+                #print("edge",edge)
+                local = edge.qnetwork_local
+                target = edge.qnetwork_target
+                local = local.float()
+                target = target.float()
+                target.eval()
+                local.train()
 
-            local.train()
-            print(action_values)
-            #Epsilon -greedy action selction
-            act=0
-            if random.random() > eps:
-                act = np.argmax(action_values.cpu().data.numpy())
-                #edge_actions.append(np.argmax(action_values.cpu().data.numpy()))
-            else:
-                act = randint(0, len(edge.neighbour)-1)
-                #edge_actions.append(np.arange(len(edge.neighbour)))
+                #print("edge name",edge_name)
+                edge_states = simulator.get_state(edge)
+                states.append(edge_states)
+                edge_actions = []
+                #print("edge_states", edge_states)
+                for state in edge_states:
+                    #with torch.no_grad():
+                        #print("---------------------------------------------",state)
+                    var1 = Variable(torch.from_numpy(name_to_code[state[0]]),requires_grad=True)
+                    action_values = local(var1.float())
 
-
-            act = edge.neighbour[act]
-            #print(edge.name, act)
-            step_info.append((edge_name,state[1],state[0],act,action_values))
-            edge_actions.append(act)
-
-        actions.append(edge_actions)
-    #print("step_info IQL",step_info)
-    #print("--------------------------------------------------------------------------------------------------------------------------")
-    #for x in step_info:
-    #    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-    #    print(x)
-    #    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-
-    #print("--------------------------------------------------------------------------------------------------------------------------")
-    obs,done = simulator.step(step_info) # #tuple(edge,vehicle,state,action, action_values,terminal,reward)
-    #print(obs)
-
-    for ob in obs:
+                    local.train()
+                    #print(action_values)
+                    #Epsilon -greedy action selction
+                    act=0
+                    if random.random() > eps:
+                        act = np.argmax(action_values.cpu().data.numpy())
+                        #edge_actions.append(np.argmax(action_values.cpu().data.numpy()))
+                    else:
+                        act = randint(0, len(edge.neighbour)-1)
+                        #edge_actions.append(np.arange(len(edge.neighbour)))
 
 
-        edge_name = ob[0]
-        edge = edges[edge_name]
-    #     = edges[idx]
-        local = edge.qnetwork_local
-        target = edge.qnetwork_target
+                    act = edge.neighbour[act]
+                    #print(edge.name, act)
+                    step_info.append((edge_name,state[1],state[0],act,action_values))
+                    edge_actions.append(act)
 
-        predicted_target = ob[4]
-        terminal_state = ob[5]
-        reward = ob[6]
-        predicted_target = torch.max(predicted_target)
-        next_state = ob[2]
-        criterion = torch.nn.MSELoss()
-        local.train()
-        target.eval()
-        with torch.no_grad():
-            var2 = Variable(torch.from_numpy(name_to_code[next_state]),requires_grad=True)
-            label_next = max(qnetwork_target(var2.float()).cpu().data.numpy())
+                actions.append(edge_actions)
+            #print("step_info IQL",step_info)
+            #print("--------------------------------------------------------------------------------------------------------------------------")
+            #for x in step_info:
+            #    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+            #    print(x)
+            #    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
-        print(label_next,predicted_target)
-        target = reward + DISCOUNT_FACTOR*label_next
-        print("predicted_target: ", predicted_target)
-        print("target: ", target)
-        loss = criterion(predicted_target,torch.tensor(target)).to(device)
-        print(loss)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            #print("--------------------------------------------------------------------------------------------------------------------------")
+            obs,done = simulator.step(step_info) # #tuple(edge,vehicle,state,action, action_values,terminal,reward)
+            #print(obs)
 
-        #reward = rewards[idx]
-        #action = actions[idx]
-        #state = states[i]
+            for ob in obs:
 
 
-        #predicted_targets = local(name_to_code[state]).gather(1,action)
+                edge_name = ob[0]
+                edge = edges[edge_name]
+            #     = edges[idx]
+                local = edge.qnetwork_local
+                target = edge.qnetwork_target
+
+                predicted_target = ob[4]
+                terminal_state = ob[5]
+                reward = ob[6]
+                accumulated_reward = accumulated_reward+reward
+                predicted_target = torch.max(predicted_target)
+                next_state = ob[2]
+                criterion = torch.nn.MSELoss()
+                local.train()
+                target.eval()
+                with torch.no_grad():
+                    var2 = Variable(torch.from_numpy(name_to_code[next_state]),requires_grad=True)
+                    label_next = max(qnetwork_target(var2.float()).cpu().data.numpy())
+
+                #print(label_next,predicted_target)
+                target = reward + DISCOUNT_FACTOR*label_next*(1-terminal_state)
+                #print("predicted_target: ", predicted_target)
+                #print("target: ", target)
+                loss = criterion(predicted_target,torch.tensor(target)).to(device)
+                #print(loss)
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                #reward = rewards[idx]
+                #action = actions[idx]
+                #state = states[i]
 
 
+                #predicted_targets = local(name_to_code[state]).gather(1,action)
 
+
+            if done or episode_step==simulator.no_of_episode_step-1:
+                print("episode: ", episode)
+                print("no of vehicles: ", simulator.get_no_of_vehicles())
+                for edge_name in edge_names:
+                    edge = edges[edge_name]
+                    edge.qnetwork_target.load_state_dict(edge.qnetwork_local.state_dict())
+                    soft_update(edge.qnetwork_local,edge.qnetwork_target,TAU)
+                print("accumulated_reward",accumulated_reward)
+
+                simulator.terminate()
+                print("sim terminated")
+                simulator.reset()
+                accumulated_reward_list.append(accumulated_reward)
+                break
+        print(range(1,len(accumulated_reward_list)+1))
+        print(accumulated_reward_list)
+        if(episode%5==0):
+            plt.plot(range(1,len(accumulated_reward_list)+1),accumulated_reward_list)
+            plt.ylabel('reward')
+            plt.xlabel("episode")
+            plt.savefig("epoch"+str(epoch)+"episode"+str(episode)+'.png')
 
 
 states = np.array([0]*n_edges)
 
 actions=[]
-
-simulator.terminate()
