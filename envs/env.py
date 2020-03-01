@@ -167,9 +167,13 @@ class TrafficSimulatorEdge:
         self.sim.close()
 
     def step(self, step_info): #step_info #tuple(edge,vehicle,state,action, action_values)
+        print("step_info before", step_info)
         step_info = self._set_route(step_info)
+        print("after after after after")
+        print("step_info after", step_info)
         reward = []
-
+        print()
+        print()
         self._simulate(10)
 
         observations = []
@@ -177,7 +181,11 @@ class TrafficSimulatorEdge:
             edge_name = step_info_instance[0]
 
             #edge = edges[edge_name]
-            reward = self.sim.edge.getLastStepVehicleNumber(edge_name)*-1
+            try:
+                reward = self.sim.edge.getLastStepVehicleNumber(edge_name)*-1
+            except:
+                print("edge_name env", edge_name)
+                print("step_info_instance", step_info_instance)
             step_info_instance = list(step_info_instance)
             #print(reward)
             step_info_instance.append(reward)
@@ -226,15 +234,17 @@ class TrafficSimulatorEdge:
                 step_info_instance = tuple(step_info_instance)
                 obs.append(step_info_instance)
             else:
+                new_route = tuple(old_route)
                 step_info_instance = list(step_info_instance)
                 step_info_instance.append(1)
-                step_info_instance = tuple(step_info)
+                step_info_instance = tuple(step_info_instance)
                 obs.append(step_info_instance)
 
 
             try:
                 self.sim.vehicle.setRoute(veh,tuple(new_route))
             except:
+                print("new route", new_route)
                 print("route assignment failed")
                 pass
 

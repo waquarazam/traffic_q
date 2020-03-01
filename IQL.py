@@ -105,9 +105,12 @@ for index in range(100):
     states = []
     step_info = [] #tuple(edge,vehicle,state,action, act_val)
     for edge_name in edge_names:
+        #print("edge_name IQL", edge_name)
+        #print()
         if ':' in edge_name:
             continue
         edge = edges[edge_name]
+        #print("edge",edge)
         local = edge.qnetwork_local
         target = edge.qnetwork_target
         local = local.float()
@@ -119,15 +122,15 @@ for index in range(100):
         edge_states = simulator.get_state(edge)
         states.append(edge_states)
         edge_actions = []
+        #print("edge_states", edge_states)
         for state in edge_states:
-            with torch.no_grad():
+            #with torch.no_grad():
                 #print("---------------------------------------------",state)
-                var1 = Variable(torch.from_numpy(name_to_code[state[0]]),requires_grad=True)
-                action_values = local(var1.float())
+            var1 = Variable(torch.from_numpy(name_to_code[state[0]]),requires_grad=True)
+            action_values = local(var1.float())
+
             local.train()
-            #print(action_values)
-
-
+            print(action_values)
             #Epsilon -greedy action selction
             act=0
             if random.random() > eps:
@@ -140,10 +143,18 @@ for index in range(100):
 
             act = edge.neighbour[act]
             #print(edge.name, act)
-            step_info.append((edge_name,state[1],state[0],act,action_values.cpu().data.numpy()))
+            step_info.append((edge_name,state[1],state[0],act,action_values))
             edge_actions.append(act)
 
         actions.append(edge_actions)
+    #print("step_info IQL",step_info)
+    #print("--------------------------------------------------------------------------------------------------------------------------")
+    #for x in step_info:
+    #    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+    #    print(x)
+    #    print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
+    #print("--------------------------------------------------------------------------------------------------------------------------")
     obs,done = simulator.step(step_info) # #tuple(edge,vehicle,state,action, action_values,terminal,reward)
     #print(obs)
 
@@ -159,7 +170,7 @@ for index in range(100):
         predicted_target = ob[4]
         terminal_state = ob[5]
         reward = ob[6]
-        predicted_target = max(predicted_target)
+        predicted_target = torch.max(predicted_target)
         next_state = ob[2]
         criterion = torch.nn.MSELoss()
         local.train()
@@ -170,7 +181,10 @@ for index in range(100):
 
         print(label_next,predicted_target)
         target = reward + DISCOUNT_FACTOR*label_next
-        loss = criterion(torch.tensor([predicted_target]),torch.tensor([target])).to(device)
+        print("predicted_target: ", predicted_target)
+        print("target: ", target)
+        loss = criterion(predicted_target,torch.tensor(target)).to(device)
+        print(loss)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
