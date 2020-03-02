@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on Mon Mar  2 05:27:44 2020 by Eclipse SUMO Version 1.5.0
+<!-- generated on Mon Mar  2 06:24:54 2020 by Eclipse SUMO Version 1.5.0
 <configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
@@ -30,14 +30,22 @@
     </report>
 
     <traci_server>
-        <remote-port value="8023"/>
+        <remote-port value="8039"/>
     </traci_server>
 
     <random_number>
-        <seed value="22"/>
+        <seed value="30"/>
     </random_number>
 
 </configuration>
 -->
 
 <tripinfos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/tripinfo_file.xsd">
+    <tripinfo id="f_3_10.8" depart="1003.00" departLane="np8_nt15_0" departPos="0.00" departSpeed="0.00" departDelay="-0.97" arrival="2217.00" arrivalLane="nt11_np18_0" arrivalPos="67.80" arrivalSpeed="11.43" duration="1214.00" routeLength="935.60" waitingTime="1119.00" waitingCount="10" stopTime="0.00" timeLoss="1173.59" rerouteNo="11" devices="tripinfo_f_3_10.8 routing_f_3_10.8" vType="type1" speedFactor="1.14" vaporized=""/>
+    <tripinfo id="f_3_10.6" depart="977.00" departLane="np8_nt15_0" departPos="12.32" departSpeed="0.00" departDelay="-0.98" arrival="2251.00" arrivalLane="nt11_np18_0" arrivalPos="67.80" arrivalSpeed="14.26" duration="1274.00" routeLength="937.68" waitingTime="1188.00" waitingCount="10" stopTime="0.00" timeLoss="1234.53" rerouteNo="7" devices="tripinfo_f_3_10.6 routing_f_3_10.6" vType="type1" speedFactor="1.19" vaporized=""/>
+    <tripinfo id="f_3_10.19" depart="1420.00" departLane="np8_nt15_0" departPos="60.96" departSpeed="0.00" departDelay="273.08" arrival="2253.00" arrivalLane="nt11_np18_0" arrivalPos="67.80" arrivalSpeed="14.38" duration="833.00" routeLength="1270.41" waitingTime="703.00" waitingCount="12" stopTime="0.00" timeLoss="752.78" rerouteNo="5" devices="tripinfo_f_3_10.19 routing_f_3_10.19" vType="type1" speedFactor="1.03" vaporized=""/>
+    <tripinfo id="f_3_10.0" depart="900.00" departLane="np8_nt15_0" departPos="0.35" departSpeed="0.00" departDelay="0.00" arrival="2800.00" arrivalLane="nt11_np18_0" arrivalPos="67.80" arrivalSpeed="7.58" duration="1900.00" routeLength="1855.57" waitingTime="1708.00" waitingCount="15" stopTime="0.00" timeLoss="1783.54" rerouteNo="16" devices="tripinfo_f_3_10.0 routing_f_3_10.0" vType="type1" speedFactor="1.10" vaporized=""/>
+    <tripinfo id="f_3_10.11" depart="1084.00" departLane="np8_nt15_0" departPos="0.00" departSpeed="0.00" departDelay="41.04" arrival="3610.00" arrivalLane="nt11_np18_0" arrivalPos="67.80" arrivalSpeed="16.90" duration="2526.00" routeLength="1463.81" waitingTime="2324.00" waitingCount="20" stopTime="0.00" timeLoss="2425.47" rerouteNo="16" devices="tripinfo_f_3_10.11 routing_f_3_10.11" vType="type1" speedFactor="0.91" vaporized=""/>
+    <tripinfo id="f_3_9.9" depart="1016.00" departLane="np6_nt5_0" departPos="6.96" departSpeed="0.00" departDelay="-0.96" arrival="3763.00" arrivalLane="nt1_np20_0" arrivalPos="67.80" arrivalSpeed="21.11" duration="2747.00" routeLength="1323.36" waitingTime="2360.00" waitingCount="13" stopTime="0.00" timeLoss="2429.30" rerouteNo="30" devices="tripinfo_f_3_9.9 routing_f_3_9.9" vType="type1" speedFactor="1.10" vaporized=""/>
+    <tripinfo id="f_4_9.32" depart="2654.00" departLane="np6_nt5_0" departPos="61.31" departSpeed="0.00" departDelay="1298.32" arrival="3972.00" arrivalLane="nt1_np20_0" arrivalPos="67.80" arrivalSpeed="19.27" duration="1318.00" routeLength="1903.33" waitingTime="936.00" waitingCount="9" stopTime="0.00" timeLoss="988.38" rerouteNo="19" devices="tripinfo_f_4_9.32 routing_f_4_9.32" vType="type1" speedFactor="0.97" vaporized=""/>
+    <tripinfo id="f_4_9.1" depart="1204.00" departLane="np6_nt5_0" departPos="35.27" departSpeed="0.00" departDelay="-0.87" arrival="4561.00" arrivalLane="nt1_np20_0" arrivalPos="67.80" arrivalSpeed="17.10" duration="3357.00" routeLength="2090.61" waitingTime="2971.00" waitingCount="21" stopTime="0.00" timeLoss="3071.97" rerouteNo="37" devices="tripinfo_f_4_9.1 routing_f_4_9.1" vType="type1" speedFactor="0.89" vaporized=""/>
