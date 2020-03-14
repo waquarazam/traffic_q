@@ -1,29 +1,29 @@
 <nodes>
-  <node id="nt1" x="0.00" y="0.00" type="traffic_light"/>
-  <node id="nt2" x="200.00" y="0.00" type="traffic_light"/>
-  <node id="nt3" x="400.00" y="0.00" type="traffic_light"/>
-  <node id="nt4" x="600.00" y="0.00" type="traffic_light"/>
-  <node id="nt5" x="800.00" y="0.00" type="traffic_light"/>
-  <node id="nt6" x="0.00" y="200.00" type="traffic_light"/>
-  <node id="nt7" x="200.00" y="200.00" type="traffic_light"/>
-  <node id="nt8" x="400.00" y="200.00" type="traffic_light"/>
-  <node id="nt9" x="600.00" y="200.00" type="traffic_light"/>
-  <node id="nt10" x="800.00" y="200.00" type="traffic_light"/>
-  <node id="nt11" x="0.00" y="400.00" type="traffic_light"/>
-  <node id="nt12" x="200.00" y="400.00" type="traffic_light"/>
-  <node id="nt13" x="400.00" y="400.00" type="traffic_light"/>
-  <node id="nt14" x="600.00" y="400.00" type="traffic_light"/>
-  <node id="nt15" x="800.00" y="400.00" type="traffic_light"/>
-  <node id="nt16" x="0.00" y="600.00" type="traffic_light"/>
-  <node id="nt17" x="200.00" y="600.00" type="traffic_light"/>
-  <node id="nt18" x="400.00" y="600.00" type="traffic_light"/>
-  <node id="nt19" x="600.00" y="600.00" type="traffic_light"/>
-  <node id="nt20" x="800.00" y="600.00" type="traffic_light"/>
-  <node id="nt21" x="0.00" y="800.00" type="traffic_light"/>
-  <node id="nt22" x="200.00" y="800.00" type="traffic_light"/>
-  <node id="nt23" x="400.00" y="800.00" type="traffic_light"/>
-  <node id="nt24" x="600.00" y="800.00" type="traffic_light"/>
-  <node id="nt25" x="800.00" y="800.00" type="traffic_light"/>
+  <node id="nt1" x="0.00" y="0.00" type="unregulated"/>
+  <node id="nt2" x="200.00" y="0.00" type="unregulated"/>
+  <node id="nt3" x="400.00" y="0.00" type="unregulated"/>
+  <node id="nt4" x="600.00" y="0.00" type="unregulated"/>
+  <node id="nt5" x="800.00" y="0.00" type="unregulated"/>
+  <node id="nt6" x="0.00" y="200.00" type="unregulated"/>
+  <node id="nt7" x="200.00" y="200.00" type="unregulated"/>
+  <node id="nt8" x="400.00" y="200.00" type="unregulated"/>
+  <node id="nt9" x="600.00" y="200.00" type="unregulated"/>
+  <node id="nt10" x="800.00" y="200.00" type="unregulated"/>
+  <node id="nt11" x="0.00" y="400.00" type="unregulated"/>
+  <node id="nt12" x="200.00" y="400.00" type="unregulated"/>
+  <node id="nt13" x="400.00" y="400.00" type="unregulated"/>
+  <node id="nt14" x="600.00" y="400.00" type="unregulated"/>
+  <node id="nt15" x="800.00" y="400.00" type="unregulated"/>
+  <node id="nt16" x="0.00" y="600.00" type="unregulated"/>
+  <node id="nt17" x="200.00" y="600.00" type="unregulated"/>
+  <node id="nt18" x="400.00" y="600.00" type="unregulated"/>
+  <node id="nt19" x="600.00" y="600.00" type="unregulated"/>
+  <node id="nt20" x="800.00" y="600.00" type="unregulated"/>
+  <node id="nt21" x="0.00" y="800.00" type="unregulated"/>
+  <node id="nt22" x="200.00" y="800.00" type="unregulated"/>
+  <node id="nt23" x="400.00" y="800.00" type="unregulated"/>
+  <node id="nt24" x="600.00" y="800.00" type="unregulated"/>
+  <node id="nt25" x="800.00" y="800.00" type="unregulated"/>
   <node id="np1" x="0.00" y="-75.00" type="priority"/>
   <node id="np2" x="200.00" y="-75.00" type="priority"/>
   <node id="np3" x="400.00" y="-75.00" type="priority"/>

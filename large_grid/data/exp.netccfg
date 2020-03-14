@@ -3,7 +3,6 @@
     <edge-files value="exp.edg.xml"/>
     <node-files value="exp.nod.xml"/>
     <type-files value="exp.typ.xml"/>
-    <tllogic-files value="exp.tll.xml"/>
     <connection-files value="exp.con.xml"/>
   </input>
   <output>

@@ -20,7 +20,7 @@ def output_nodes(node):
     ind = 1
     for dy in np.arange(0, L0 * 5, L0):
         for dx in np.arange(0, L0 * 5, L0):
-            str_nodes += node % ('nt' + str(ind), dx, dy, 'traffic_light')
+            str_nodes += node % ('nt' + str(ind), dx, dy, 'unregulated')
             ind += 1
     # other nodes
     ind = 1
@@ -177,7 +177,7 @@ def output_netconfig():
     str_config += '    <edge-files value="exp.edg.xml"/>\n'
     str_config += '    <node-files value="exp.nod.xml"/>\n'
     str_config += '    <type-files value="exp.typ.xml"/>\n'
-    str_config += '    <tllogic-files value="exp.tll.xml"/>\n'
+    #str_config += '    <tllogic-files value="exp.tll.xml"/>\n'
     str_config += '    <connection-files value="exp.con.xml"/>\n'
     str_config += '  </input>\n  <output>\n'
     str_config += '    <output-file value="exp.net.xml"/>\n'
@@ -421,13 +421,13 @@ def main():
 
     # net config file
     write_file('./exp.netccfg', output_netconfig())
+    print("dfsssssssssssssssssssssssssssssssssssssssssssssssssssssssssss")
 
     # generate net.xml file
     os.system('netconvert -c exp.netccfg')
 
     # raw.rou.xml file
     write_file('./exp.rou.xml', output_flows(1000, 2000, 0.2))
-
     # generate rou.xml file
     # os.system('jtrrouter -n exp.net.xml -r exp.raw.rou.xml -o exp.rou.xml')
 

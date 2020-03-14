@@ -58,8 +58,8 @@ class TrafficSimulatorEdge:
     def __init__(self, port=0):
         self.seed = 12
         self.no_of_epoch = 1
-        self.no_episode_per_epoch = 20
-        self.no_of_episode_step = 500
+        self.no_episode_per_epoch = 1010
+        self.no_of_episode_step = 360
 
         self.port = DEFAULT_PORT + port
         self.sim_thread = port
@@ -120,12 +120,22 @@ class TrafficSimulatorEdge:
 
     def get_state(self, edge):
         edge_name = edge.name
+        neighbours = edge.neighbour
+        neighbour_condition = []
+        #print("get_state edge_name", edge_name)
+        #print("get_state neighbours", edge.neighbour)
+        for e in neighbours:
+            neighbour_condition.append(self.sim.edge.getLastStepVehicleNumber(e))
         state = []
         #print(edge_name)
         vehs = self.sim.edge.getLastStepVehicleIDs(edge_name)
 
         for veh in vehs:
-            state.append((self.sim.vehicle.getRoute(veh)[-1],veh))
+            s = []
+            s.append(self.sim.vehicle.getRoute(veh)[-1])
+            s = s+ neighbour_condition
+            state.append((s,veh))
+        #print("get_state state", state)
         return state
 
 
@@ -186,14 +196,26 @@ class TrafficSimulatorEdge:
         observations = []
         for step_info_instance in step_info:
             edge_name = step_info_instance[0]
+            new_state = []
+            #print("----------",step_info_instance[2])
+            new_state.append(step_info_instance[2][0])
+            edge = self.edges[edge_name]
 
+            neighbours = edge.neighbour
+            neighbour_condition = []
+            for e in neighbours:
+                neighbour_condition.append(self.sim.edge.getLastStepVehicleNumber(e))
+            new_state = new_state + neighbour_condition
+            #print("old state", step_info_instance[2])
+            #print("new state", new_state)
             #edge = edges[edge_name]
             try:
-                reward = self.sim.edge.getLastStepVehicleNumber(edge_name)*-1
+                reward = self.sim.edge.getLastStepVehicleNumber(step_info_instance[3])*-1
             except:
                 print("edge_name env", edge_name)
                 print("step_info_instance", step_info_instance)
             step_info_instance = list(step_info_instance)
+            step_info_instance[2] = new_state
             #print(reward)
             step_info_instance.append(reward)
             step_info_instance = tuple(step_info_instance)
@@ -258,7 +280,8 @@ class TrafficSimulatorEdge:
                 #print("-----------------new-------------------")
                 #print(new_route)
                 #print("current index ",current_edge_index, " edge ", edge, "action: ", a)
-                self.sim.vehicle.setRoute(veh,tuple(new_route))
+                if(old_route!=new_route):
+                    self.sim.vehicle.setRoute(veh,tuple(new_route))
 
             else:
                 step_info_instance = list(step_info_instance)
@@ -312,7 +335,9 @@ class TrafficSimulatorEdge:
             #seed = self.test_seeds[test_ind]
         # self._init_sim(gui=True)
         seed = self.seed
-        self.port = (self.port+2)%8500
+        self.port = self.port+1
+        if(self.port > 8900):
+            self.port = 8002
         self._init_sim(seed, gui=gui)
         #self.cur_sec = 0
         self.cur_episode += 1
